@@ -55,11 +55,6 @@ status \
     "Start DB backup" \
     "Starting database dump to $outfile"
 
-if [[ -z $PGPASSWORD ]]; then
-    echo "Missing password"
-    exit 1
-fi
-
 if ! pg_dumpall --host "$HOST" --port "${PORT:-5432}" --username postgres -w | zstd >"$outfile"; then
     status "Database backup failed" \
         "The database dump to $outfile failed with status $?" \
