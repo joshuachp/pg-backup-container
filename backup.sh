@@ -14,7 +14,7 @@ set -exEuo pipefail
 # - BACKUP_COUNT: count of backups to keep in the BACKUP_DIR
 # - OUTDIR: Directory to store the intermediate file
 
-outfile="${OUTDIR:-.}/dump-$(date --iso-8601=s --utc).sql.zstd"
+outfile="${OUTDIR:-.}/dump-$(date -Iseconds -u).sql.zstd"
 
 panic() {
     if [ $? = '0' ]; then
