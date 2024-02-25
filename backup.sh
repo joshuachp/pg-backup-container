@@ -9,6 +9,7 @@ set -exEuo pipefail
 # - NTFY_TOPIC: topic to notify on
 # - HOST: postgres database host
 # - PORT: postgres database port
+# - USERNAME: username to use, default to postgres
 # - PGPASSWORD: password to the postgres database
 # - BACKUP_DIR: volume to backup into
 # - BACKUP_COUNT: count of backups to keep in the BACKUP_DIR
@@ -18,13 +19,19 @@ set -exEuo pipefail
 outfile="${OUTDIR:-.}/dump-$(date -Iseconds -u).sql.zstd"
 
 panic() {
-    if [ $? = '0' ]; then
+    local st=$?
+    if [ $st = '0' ]; then
         return
     fi
 
     status "Database backup failed" \
         "The database backup to $outfile failed" \
         5
+
+    # Force cleanup
+    rm -f "$outfile" || true
+
+    exit $st
 }
 
 trap "panic" ERR
@@ -57,11 +64,11 @@ status \
     "Starting database dump to $outfile"
 
 # Dump all database, encrypt the dump and zstd compress it
-pg_dumpall --host "$HOST" --port "${PORT:-5432}" --username postgres -w |
+pg_dumpall --host "$HOST" --port "${PORT:-5432}" --username "${USERNAME:-postgres}" -w |
     age --encrypt -r "$PUB_KEY" |
     zstd >"$outfile"
 st=$?
-if ! $st; then
+if [ $st != '0' ]; then
     status "Database backup failed" \
         "The database dump to $outfile failed with status $st" \
         5

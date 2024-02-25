@@ -8,6 +8,7 @@ ENV:
 - NTFY_TOPIC: topic to notify on
 - HOST: postgres database host
 - PORT: postgres database port
+- USERNAME: username to use, default to postgres
 - PGPASSWORD: password to the postgres database
 - BACKUP_DIR: volume to backup into
 - BACKUP_COUNT: count of backups to keep in the BACKUP_DIR
