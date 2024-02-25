@@ -13,6 +13,7 @@ set -exEuo pipefail
 # - BACKUP_DIR: volume to backup into
 # - BACKUP_COUNT: count of backups to keep in the BACKUP_DIR
 # - OUTDIR: Directory to store the intermediate file
+# - PUB_KEY: Public age key to encrypt the backup with
 
 outfile="${OUTDIR:-.}/dump-$(date -Iseconds -u).sql.zstd"
 
@@ -55,10 +56,16 @@ status \
     "Start DB backup" \
     "Starting database dump to $outfile"
 
-if ! pg_dumpall --host "$HOST" --port "${PORT:-5432}" --username postgres -w | zstd >"$outfile"; then
+# Dump all database, encrypt the dump and zstd compress it
+pg_dumpall --host "$HOST" --port "${PORT:-5432}" --username postgres -w |
+    age --encrypt -r "$PUB_KEY" |
+    zstd >"$outfile"
+st=$?
+if ! $st; then
     status "Database backup failed" \
-        "The database dump to $outfile failed with status $?" \
+        "The database dump to $outfile failed with status $st" \
         5
+    exit $st
 fi
 
 status \

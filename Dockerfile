@@ -1,6 +1,7 @@
 FROM alpine:3.19.1
 
 RUN apk add --no-cache \
+        age \
         bash \
         curl \
         postgresql-client \
