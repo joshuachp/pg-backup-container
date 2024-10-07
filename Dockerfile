@@ -1,10 +1,9 @@
-FROM alpine:3.19.1
+FROM postgres:17.0-alpine3.20
 
 RUN apk add --no-cache \
         age \
         bash \
         curl \
-        postgresql-client \
         zstd
 
 COPY ./backup.sh /usr/bin/backup.sh
